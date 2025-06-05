@@ -8,7 +8,11 @@
         public decimal Price { get; set; }
         public int Stock { get; set; }
         public required string Category { get; set; }
-        public required string CreatedByUserId { get; set; }
         public DateTime CreatedAt { get; set; }
+
+        //Связи с другими сущностями
+
+        public string SellerId { get; set; } = null!; //Внешний ключ (Foreign Keys)
+        public ApplicationUser Seller { get; set; } = null!; //Навигационное свойство (Navigation Properties)
     }
 }
