@@ -16,11 +16,6 @@ namespace SimpleStoreAPI.Controllers
         {
             _roleManager = roleManager;
         }
-
-        [HttpPost]
-        public async Task<RoleResult> CreateRole(CreateRoleDto createRoleDto)
-        {
-
-        }
+        
     }
 }

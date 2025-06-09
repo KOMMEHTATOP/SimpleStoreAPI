@@ -7,10 +7,10 @@ namespace SimpleStoreAPI.Service
 {
     public class AuthService : IAuthService
     {
-        private readonly UserManager<ApplicationRole> _userManager;
-        private readonly SignInManager<ApplicationRole> _signIdManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signIdManager;
         private readonly ITokenGenerator _tokenGenerator;
-        public AuthService(UserManager<ApplicationRole> userManager, SignInManager<ApplicationRole> signInManager, ITokenGenerator tokenGenerator)
+        public AuthService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ITokenGenerator tokenGenerator)
         {
             _userManager = userManager;
             _signIdManager = signInManager;
@@ -19,7 +19,7 @@ namespace SimpleStoreAPI.Service
 
         public async Task<AuthResult> RegisterAsync(RegisterDto registerDto)
         {
-            var user = new ApplicationRole { Email = registerDto.Email, UserName = registerDto.Email };
+            var user = new ApplicationUser { Email = registerDto.Email, UserName = registerDto.Email };
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded)
             {

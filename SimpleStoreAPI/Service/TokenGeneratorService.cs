@@ -15,7 +15,7 @@ namespace SimpleStoreAPI.Service
             _configuration = configuration;
         }
 
-        public string GenerateToken(ApplicationRole user)
+        public string GenerateToken(ApplicationUser user)
         {
             //список утверждений о пользователе
             var userClaims = new List<Claim>
