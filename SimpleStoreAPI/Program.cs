@@ -22,7 +22,7 @@ namespace SimpleStoreAPI
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
             //Подключение Identity
-            builder.Services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>()
+            builder.Services.AddIdentity<ApplicationRole, ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
             //Явное указание что основной способ аутентификации JWT токены
             builder.Services.AddAuthentication(options =>

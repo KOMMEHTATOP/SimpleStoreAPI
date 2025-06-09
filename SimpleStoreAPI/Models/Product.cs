@@ -13,6 +13,6 @@
         //Связи с другими сущностями
 
         public string SellerId { get; set; } = null!; //Внешний ключ (Foreign Keys)
-        public ApplicationUser Seller { get; set; } = null!; //Навигационное свойство (Navigation Properties)
+        public ApplicationRole Seller { get; set; } = null!; //Навигационное свойство (Navigation Properties)
     }
 }

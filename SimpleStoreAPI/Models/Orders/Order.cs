@@ -9,7 +9,7 @@
         public OrderStatus Status { get; set; } // Статус заказа (Pending, Completed, Cancelled и т.д.)
         
         // Связи с другими сущностями
-        public ApplicationUser User { get; set; } = null!; // Навигационное свойство для пользователя
+        public ApplicationRole User { get; set; } = null!; // Навигационное свойство для пользователя
         public ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>(); // Список позиций заказа
     }
 }
