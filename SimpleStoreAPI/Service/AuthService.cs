@@ -29,6 +29,8 @@ namespace SimpleStoreAPI.Service
                     Errors = result.Errors.Select(e => e.Description).ToList()
                 };
             }
+
+            await _userManager.AddToRoleAsync(user, "User");
             return new AuthResult { IsSuccess = true, Message = "Пользователь успешно зарегистрирован." };
         }
 
@@ -46,6 +48,7 @@ namespace SimpleStoreAPI.Service
             {
                 return new LoginResult { IsSuccess = false, Message = "Login, password not valide" };
             }
+            
             var tokenString = _tokenGenerator.GenerateToken(existingUser);
 
             return new LoginResult { IsSuccess = true, Message = "Ok", Token = tokenString };

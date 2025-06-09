@@ -5,9 +5,12 @@ namespace SimpleStoreAPI.Mappers
 {
     public class RoleMapper
     {
-        public static RoleDto ApplicationRoleToDto(ApplicationRole applicationRole)
+        public static RoleResponseDto ApplicationRoleToRoleResponseDto(ApplicationRole applicationRole)
         {
-            return new RoleDto { Id=applicationRole.Id,  Name = applicationRole.Name!, Description = applicationRole.Description };
+            return new RoleResponseDto
+            {
+                Id = applicationRole.Id, Name = applicationRole.Name!, Description = applicationRole.Description
+            };
         }
     }
 }
