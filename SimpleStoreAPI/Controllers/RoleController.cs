@@ -36,6 +36,7 @@ namespace SimpleStoreAPI.Controllers
         public async Task<IActionResult> GetAll()
         {
             var result = await _roleService.GetAllAsync();
+            
             return Ok(result);
         }
 
@@ -48,6 +49,7 @@ namespace SimpleStoreAPI.Controllers
             {
                 return BadRequest(result.Errors);
             }
+            
             return Ok(result.Data);
         }
 
@@ -60,6 +62,7 @@ namespace SimpleStoreAPI.Controllers
             {
                 return BadRequest(result.Errors);
             }
+            
             return Ok(result.Data);
         }
 
@@ -72,6 +75,7 @@ namespace SimpleStoreAPI.Controllers
             {
                 return BadRequest(result.Errors);
             }
+            
             return NoContent();
         }
     }

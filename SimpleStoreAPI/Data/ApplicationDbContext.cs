@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SimpleStoreAPI.Models;
 using SimpleStoreAPI.Models.Orders;
@@ -22,6 +23,18 @@ namespace SimpleStoreAPI.Data
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //Настройка для навигационных свойств (чтобы можно было доставать роли одним запросом вместе с юзером
+            //Так же к этим настройкам применил навигационные свойства в классах ApplicationUser/Role все нижние 3 блока
+            modelBuilder.Entity<ApplicationUser>()
+                .HasMany(u => u.UserRoles)
+                .WithOne()
+                .HasForeignKey("UserId");
+            
+            modelBuilder.Entity<ApplicationRole>()
+                .HasMany(r=>r.UserRoles)
+                .WithOne()
+                .HasForeignKey("RoleId");
         }
 
         public DbSet<Product> Products { get; set; } = null!;

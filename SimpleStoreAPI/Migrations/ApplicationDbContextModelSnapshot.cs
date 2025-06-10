@@ -137,6 +137,10 @@ namespace SimpleStoreAPI.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -352,13 +356,13 @@ namespace SimpleStoreAPI.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.HasOne("SimpleStoreAPI.Models.ApplicationRole", null)
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("SimpleStoreAPI.Models.ApplicationUser", null)
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -375,7 +379,7 @@ namespace SimpleStoreAPI.Migrations
 
             modelBuilder.Entity("SimpleStoreAPI.Models.Orders.Order", b =>
                 {
-                    b.HasOne("SimpleStoreAPI.Models.ApplicationUser", "User")
+                    b.HasOne("SimpleStoreAPI.Models.ApplicationRole", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -405,13 +409,23 @@ namespace SimpleStoreAPI.Migrations
 
             modelBuilder.Entity("SimpleStoreAPI.Models.Product", b =>
                 {
-                    b.HasOne("SimpleStoreAPI.Models.ApplicationUser", "Seller")
+                    b.HasOne("SimpleStoreAPI.Models.ApplicationRole", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("SimpleStoreAPI.Models.ApplicationRole", b =>
+                {
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("SimpleStoreAPI.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("SimpleStoreAPI.Models.Orders.Order", b =>
