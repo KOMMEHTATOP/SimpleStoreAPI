@@ -9,7 +9,9 @@ namespace SimpleStoreAPI.Mappers
         {
             return new RoleResponseDto
             {
-                Id = applicationRole.Id, Name = applicationRole.Name!, Description = applicationRole.Description
+                Id = applicationRole.Id, 
+                Name = applicationRole.Name!, 
+                Description = applicationRole.Description
             };
         }
     }
