@@ -61,6 +61,7 @@ namespace SimpleStoreAPI
            builder.Services.AddScoped<IAuthService, AuthService>();
            builder.Services.AddScoped<ITokenGenerator, TokenGeneratorService>();
            builder.Services.AddScoped<IRoleService, RoleService>();
+           builder.Services.AddScoped<IUserService, UserService>();
 
            var app = builder.Build();
 

@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using SimpleStoreAPI.DTOs.Role;
 using SimpleStoreAPI.Interfaces;
-using SimpleStoreAPI.Models;
-using SimpleStoreAPI.Service;
 
 namespace SimpleStoreAPI.Controllers
 {
