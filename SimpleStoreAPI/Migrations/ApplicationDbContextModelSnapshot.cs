@@ -319,6 +319,9 @@ namespace SimpleStoreAPI.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
                     b.HasIndex("SellerId");
@@ -379,7 +382,7 @@ namespace SimpleStoreAPI.Migrations
 
             modelBuilder.Entity("SimpleStoreAPI.Models.Orders.Order", b =>
                 {
-                    b.HasOne("SimpleStoreAPI.Models.ApplicationRole", "User")
+                    b.HasOne("SimpleStoreAPI.Models.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -409,7 +412,7 @@ namespace SimpleStoreAPI.Migrations
 
             modelBuilder.Entity("SimpleStoreAPI.Models.Product", b =>
                 {
-                    b.HasOne("SimpleStoreAPI.Models.ApplicationRole", "Seller")
+                    b.HasOne("SimpleStoreAPI.Models.ApplicationUser", "Seller")
                         .WithMany()
                         .HasForeignKey("SellerId")
                         .OnDelete(DeleteBehavior.Cascade)
