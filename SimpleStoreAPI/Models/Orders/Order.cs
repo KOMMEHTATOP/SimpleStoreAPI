@@ -2,7 +2,7 @@
 {
     public class Order
     {
-        public int Id { get; set; }
+        public required string Id { get; set; }
         public required string UserId { get; set; } // Внешний ключ для пользователя
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }

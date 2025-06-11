@@ -58,10 +58,12 @@ namespace SimpleStoreAPI
            builder.Services.AddSwaggerGen();
            
            // Регистрация сервисов в DI контейнере
+           builder.Services.AddHttpContextAccessor();
            builder.Services.AddScoped<IAuthService, AuthService>();
            builder.Services.AddScoped<ITokenGenerator, TokenGeneratorService>();
            builder.Services.AddScoped<IRoleService, RoleService>();
            builder.Services.AddScoped<IUserService, UserService>();
+           builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
            var app = builder.Build();
 

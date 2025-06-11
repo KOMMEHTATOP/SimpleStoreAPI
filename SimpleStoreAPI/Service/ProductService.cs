@@ -10,13 +10,22 @@ namespace SimpleStoreAPI.Service;
 public class ProductService : IProductService
 {
     private readonly ApplicationDbContext _context;
-    public ProductService(ApplicationDbContext context)
+    private readonly ICurrentUserService _currentUserService;
+    public ProductService(ApplicationDbContext context, ICurrentUserService currentUserService)
     {
         _context = context;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<ProductResponseDto>> CreateAsync(CreateProductDto productDto)
     {
+        var userId = _currentUserService.GetUserId();
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Result<ProductResponseDto>.Failed("User not authenticated");
+        }
+
         var existProduct = await _context.Products.AnyAsync(p => p.Name == productDto.Name);
 
         if (existProduct)
@@ -27,7 +36,7 @@ public class ProductService : IProductService
         var newProduct = ProductMapper.CreateProductFromDto(productDto);
         newProduct.CreatedAt = DateTime.Now;
         newProduct.UpdatedAt = DateTime.Now;
-        
+        newProduct.SellerId = userId;
         _context.Add(newProduct);
         await _context.SaveChangesAsync();
 
@@ -35,35 +44,76 @@ public class ProductService : IProductService
         return Result<ProductResponseDto>.Success(result);
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    public Task<IEnumerable<ProductResponseDto>> GetAllAsync()
+    public async Task<IEnumerable<ProductResponseDto>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var products = await _context.Products.ToListAsync();
+        return products.Select(ProductMapper.ProductToResponseDto).ToList();
     }
-    public Task<Result<ProductResponseDto>> GetByIdAsync(string id)
+
+
+    public async Task<Result<ProductResponseDto>> GetByIdAsync(string id)
     {
-        throw new NotImplementedException();
+        var existProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (existProduct == null)
+        {
+            return Result<ProductResponseDto>.Failed("Product not found");
+        }
+
+        return Result<ProductResponseDto>.Success(ProductMapper.ProductToResponseDto(existProduct));
     }
-    public Task<Result<ProductResponseDto>> UpdateAsync(string id, UpdateProductDto productDto)
+
+    public async Task<Result<ProductResponseDto>> UpdateAsync(string id, UpdateProductDto productDto)
     {
-        throw new NotImplementedException();
+        var currentUserId = _currentUserService.GetUserId();
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Result<ProductResponseDto>.Failed("User not authenticated");
+        }
+
+        var existProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (existProduct == null)
+        {
+            return Result<ProductResponseDto>.Failed("Product not found");
+        }
+
+        if (currentUserId != existProduct.SellerId)
+        {
+            return Result<ProductResponseDto>.Failed("Seller id not match");
+        }
+
+        ProductMapper.UpdateExistingProductFromDto(existProduct, productDto);
+        existProduct.UpdatedAt = DateTime.Now;
+        await _context.SaveChangesAsync();
+
+        return Result<ProductResponseDto>.Success(ProductMapper.ProductToResponseDto(existProduct));
     }
-    public Task<Result> DeleteAsync(string id)
+
+    public async Task<Result> DeleteAsync(string id)
     {
-        throw new NotImplementedException();
+        var currentUserId = _currentUserService.GetUserId();
+
+        if (string.IsNullOrEmpty(currentUserId))
+        {
+            return Result.Failed("User not authenticated");
+        }
+
+        var existProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+
+        if (existProduct == null)
+        {
+            return Result.Failed("Product not found");
+        }
+
+        if (currentUserId != existProduct.SellerId)
+        {
+            return Result.Failed("Seller id not match");
+        }
+
+        _context.Remove(existProduct);
+        await _context.SaveChangesAsync();
+        return Result.Success();
     }
 }

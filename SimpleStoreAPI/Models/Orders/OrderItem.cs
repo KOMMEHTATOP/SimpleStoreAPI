@@ -2,9 +2,9 @@
 {
     public class OrderItem
     {
-        public int Id { get; set; }
-        public int OrderId { get; set; } // Внешний ключ для заказа
-        public int ProductId { get; set; } // Внешний ключ для продукта
+        public string Id { get; set; }
+        public string OrderId { get; set; } // Внешний ключ для заказа
+        public string ProductId { get; set; } // Внешний ключ для продукта
         public int Quantity { get; set; } // Количество товара в заказе
         public decimal PriceAtPurchase { get; set; } // Цена товара на момент заказа
 
