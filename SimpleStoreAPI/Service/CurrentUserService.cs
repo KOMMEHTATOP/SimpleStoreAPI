@@ -1,4 +1,5 @@
 using SimpleStoreAPI.Interfaces;
+using System.Security.Claims;
 
 namespace SimpleStoreAPI.Service;
 
@@ -12,6 +13,6 @@ public class CurrentUserService : ICurrentUserService
 
     public string? GetUserId()
     {
-        return _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
+        return _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
 }

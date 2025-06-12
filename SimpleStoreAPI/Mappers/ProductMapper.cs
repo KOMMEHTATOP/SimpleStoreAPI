@@ -27,7 +27,9 @@ public static class ProductMapper
             Description = product.Description,
             Price = product.Price,
             Category = product.Category,
-            Stock = product.Stock
+            Stock = product.Stock,
+            SellerId = product.SellerId,
+            SellerName = product.Seller.UserName!
         };
     }
 

@@ -20,40 +20,51 @@ public class ProductService : IProductService
     public async Task<Result<ProductResponseDto>> CreateAsync(CreateProductDto productDto)
     {
         var userId = _currentUserService.GetUserId();
+        Console.WriteLine($"ProductService - UserId from CurrentUserService: '{userId}'");
+        Console.WriteLine($"ProductService - UserId is null or empty: {string.IsNullOrEmpty(userId)}");
 
         if (string.IsNullOrEmpty(userId))
         {
             return Result<ProductResponseDto>.Failed("User not authenticated");
         }
 
-        var existProduct = await _context.Products.AnyAsync(p => p.Name == productDto.Name);
+        var existProduct = await _context.Products.AnyAsync(p => p.Name == productDto.Name && p.SellerId == userId);
 
         if (existProduct)
         {
-            return Result<ProductResponseDto>.Failed("Product already exists");
+            return Result<ProductResponseDto>.Failed("You already have a product with this name");
         }
 
         var newProduct = ProductMapper.CreateProductFromDto(productDto);
-        newProduct.CreatedAt = DateTime.Now;
-        newProduct.UpdatedAt = DateTime.Now;
+        newProduct.CreatedAt = DateTime.UtcNow;
+        newProduct.UpdatedAt = DateTime.UtcNow;
         newProduct.SellerId = userId;
         _context.Add(newProduct);
         await _context.SaveChangesAsync();
+        
+        var createProduct = await _context.Products
+            .Include(p => p.Seller)
+            .FirstAsync(p=>p.Id == newProduct.Id);
 
-        var result = ProductMapper.ProductToResponseDto(newProduct);
+        var result = ProductMapper.ProductToResponseDto(createProduct);
         return Result<ProductResponseDto>.Success(result);
     }
 
     public async Task<IEnumerable<ProductResponseDto>> GetAllAsync()
     {
-        var products = await _context.Products.ToListAsync();
+        var products = await _context.Products
+            .Include(p => p.Seller)
+            .AsNoTracking()
+            .ToListAsync();
         return products.Select(ProductMapper.ProductToResponseDto).ToList();
     }
 
 
     public async Task<Result<ProductResponseDto>> GetByIdAsync(string id)
     {
-        var existProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+        var existProduct = await _context.Products
+            .Include(p => p.Seller)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (existProduct == null)
         {
@@ -72,7 +83,9 @@ public class ProductService : IProductService
             return Result<ProductResponseDto>.Failed("User not authenticated");
         }
 
-        var existProduct = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
+        var existProduct = await _context.Products
+            .Include(p => p.Seller)
+            .FirstOrDefaultAsync(p => p.Id == id);
 
         if (existProduct == null)
         {
@@ -81,11 +94,11 @@ public class ProductService : IProductService
 
         if (currentUserId != existProduct.SellerId)
         {
-            return Result<ProductResponseDto>.Failed("Seller id not match");
+            return Result<ProductResponseDto>.Failed("You are not authorized to modify this product");
         }
 
         ProductMapper.UpdateExistingProductFromDto(existProduct, productDto);
-        existProduct.UpdatedAt = DateTime.Now;
+        existProduct.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
 
         return Result<ProductResponseDto>.Success(ProductMapper.ProductToResponseDto(existProduct));
