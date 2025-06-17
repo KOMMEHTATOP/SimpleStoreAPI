@@ -91,8 +91,7 @@ namespace SimpleStoreAPI
                     }
                 });
             });
-
-
+            
             // Регистрация сервисов в DI контейнере
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IAuthService, AuthService>();
@@ -101,6 +100,12 @@ namespace SimpleStoreAPI
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddAuthorizationBuilder()
+                .AddPolicy("CanSellProducts", policy => policy.RequireRole("Admin", "Seller"))
+                .AddPolicy("CanBuyProducts", policy => policy.RequireRole("Admin", "Seller", "Customer"))
+                .AddPolicy("CanViewOwnOrders", policy => policy.RequireAuthenticatedUser())
+                .AddPolicy("CanManageUsers", policy => policy.RequireRole("Admin"))
+                .AddPolicy("CanAssignRoles", policy => policy.RequireRole("Admin"));
 
             var app = builder.Build();
 

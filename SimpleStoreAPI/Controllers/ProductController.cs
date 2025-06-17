@@ -7,7 +7,6 @@ namespace SimpleStoreAPI.Controllers;
 
 [Route("api/products")]
 [ApiController]
-[Authorize]
 public class ProductController : ControllerBase
 {
     private readonly IProductService _productService;
@@ -17,6 +16,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "CanSellProducts")]
     public async Task<IActionResult> Create([FromBody] CreateProductDto productDto)
     {
         var newProduct = await _productService.CreateAsync(productDto);
@@ -52,6 +52,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = "CanSellProducts")]
     public async Task<IActionResult> Update(string id, [FromBody] UpdateProductDto productDto)
     {
         var updatedProduct = await _productService.UpdateAsync(id, productDto);
@@ -65,6 +66,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = "CanSellProducts")]
     public async Task<IActionResult> Delete(string id)
     {
         var deletedProduct = await _productService.DeleteAsync(id);

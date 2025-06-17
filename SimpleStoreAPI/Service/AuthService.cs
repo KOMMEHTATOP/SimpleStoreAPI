@@ -30,7 +30,7 @@ namespace SimpleStoreAPI.Service
                 };
             }
 
-            await _userManager.AddToRoleAsync(user, "User");
+            await _userManager.AddToRoleAsync(user, "Customer");
             return new AuthResult { IsSuccess = true, Message = "Пользователь успешно зарегистрирован." };
         }
 

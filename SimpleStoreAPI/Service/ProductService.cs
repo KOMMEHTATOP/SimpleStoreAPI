@@ -92,7 +92,10 @@ public class ProductService : IProductService
             return Result<ProductResponseDto>.Failed("Product not found");
         }
 
-        if (currentUserId != existProduct.SellerId)
+        var isOwner = currentUserId == existProduct.SellerId;
+        var isAdmin = _currentUserService.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
         {
             return Result<ProductResponseDto>.Failed("You are not authorized to modify this product");
         }
@@ -120,9 +123,12 @@ public class ProductService : IProductService
             return Result.Failed("Product not found");
         }
 
-        if (currentUserId != existProduct.SellerId)
+        var isOwner = currentUserId == existProduct.SellerId;
+        var isAdmin = _currentUserService.IsInRole("Admin");
+
+        if (!isOwner && !isAdmin)
         {
-            return Result.Failed("Seller id not match");
+            return Result.Failed("You are not authorized to modify this product");
         }
 
         _context.Remove(existProduct);
