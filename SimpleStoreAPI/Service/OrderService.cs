@@ -1,9 +1,10 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SimpleStoreAPI.Data;
 using SimpleStoreAPI.DTOs;
-using SimpleStoreAPI.DTOs.OrderItem;
 using SimpleStoreAPI.Interfaces;
 using SimpleStoreAPI.Mappers;
+using SimpleStoreAPI.Models;
 using SimpleStoreAPI.Models.Orders;
 
 namespace SimpleStoreAPI.Service;
@@ -12,11 +13,14 @@ public class OrderService : IOrderService
 {
     private readonly ApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public OrderService(ApplicationDbContext context, ICurrentUserService currentUserService)
+    public OrderService(ApplicationDbContext context, ICurrentUserService currentUserService,
+        UserManager<ApplicationUser> userManager)
     {
         _context = context;
         _currentUserService = currentUserService;
+        _userManager = userManager;
     }
 
     public async Task<Result<IEnumerable<OrderResponceDto>>> GetUserOrdersAsync()
@@ -46,11 +50,36 @@ public class OrderService : IOrderService
             return Result<OrderResponceDto>.Failed("No user id");
         }
 
-        var order = await _context.Orders
-            .Where(o => o.Id == id && o.UserId == userId)
-            .Include(o => o.OrderItems)
-            .ThenInclude(oi => oi.Product)
-            .FirstOrDefaultAsync();
+        var currentUser = await _userManager.FindByIdAsync(userId);
+
+        if (currentUser == null)
+        {
+            return Result<OrderResponceDto>.Failed("User not found");
+        }
+
+        var userRoles = await _userManager.GetRolesAsync(currentUser);
+        bool isAdmin = userRoles.Contains("Admin");
+
+        Order? order;
+
+        if (isAdmin)
+        {
+            // Admin может видеть любой заказ
+            order = await _context.Orders
+                .Where(o => o.Id == id)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync();
+        }
+        else
+        {
+            // Обычный пользователь только свои заказы
+            order = await _context.Orders
+                .Where(o => o.Id == id && o.UserId == userId)
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync();
+        }
 
         if (order == null)
         {
@@ -59,7 +88,7 @@ public class OrderService : IOrderService
 
         return Result<OrderResponceDto>.Success(OrderMapper.OrderToOrderResponceDto(order));
     }
-
+    
     public async Task<Result<OrderResponceDto>> CreateOrderAsync(CreateOrderDto createOrderDto)
     {
         var userId = _currentUserService.GetUserId();
@@ -192,13 +221,73 @@ public class OrderService : IOrderService
         return Result<OrderResponceDto>.Success(OrderMapper.OrderToOrderResponceDto(existingOrder));
     }
 
-    public Task<Result<OrderResponceDto>> UpdateOrderStatusAsync(string id, UpdateOrderStatusDto updateStatusDto)
+    public async Task<Result<OrderResponceDto>> UpdateOrderStatusAsync(string id, UpdateOrderStatusDto updateStatusDto)
     {
-        throw new NotImplementedException();
+        var userId = _currentUserService.GetUserId();
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Result<OrderResponceDto>.Failed("Current user is not authorized");
+        }
+
+        var currentUser = await _userManager.FindByIdAsync(userId);
+
+        if (currentUser == null)
+        {
+            return Result<OrderResponceDto>.Failed("User not found");
+        }
+
+        var currentUserRole = await _userManager.GetRolesAsync(currentUser);
+
+        if (!currentUserRole.Any(x => x is "Admin"))
+        {
+            return Result<OrderResponceDto>.Failed("You don't have the required role");
+        }
+
+        var order = await _context.Orders
+            .Include(o => o.OrderItems)
+            .ThenInclude(oi => oi.Product)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (order == null)
+        {
+            return Result<OrderResponceDto>.Failed("Order not found");
+        }
+
+        order.Status = updateStatusDto.Status;
+        await _context.SaveChangesAsync();
+
+        return Result<OrderResponceDto>.Success(OrderMapper.OrderToOrderResponceDto(order));
     }
 
-    public Task<Result> CancelOrderAsync(string id)
+    public async Task<Result> CancelOrderAsync(string id)
     {
-        throw new NotImplementedException();
+        var userId = _currentUserService.GetUserId();
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return Result.Failed("Current user is not authorized");
+        }
+
+        var existingOrder = await _context.Orders.FirstOrDefaultAsync(o => o.Id == id);
+
+        if (existingOrder == null)
+        {
+            return Result.Failed("Order not found");
+        }
+
+        if (existingOrder.UserId != userId)
+        {
+            return Result.Failed("You can only cancel your own orders");
+        }
+
+        if (existingOrder.Status != OrderStatus.Pending)
+        {
+            return Result.Failed("Can only update pending orders");
+        }
+
+        existingOrder.Status = OrderStatus.Cancelled;
+        await _context.SaveChangesAsync();
+        return Result.Success();
     }
 }

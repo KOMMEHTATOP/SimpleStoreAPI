@@ -100,6 +100,7 @@ namespace SimpleStoreAPI
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<IProductService, ProductService>();
+            builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddAuthorizationBuilder()
                 .AddPolicy("CanSellProducts", policy => policy.RequireRole("Admin", "Seller"))
                 .AddPolicy("CanBuyProducts", policy => policy.RequireRole("Admin", "Seller", "Customer"))
