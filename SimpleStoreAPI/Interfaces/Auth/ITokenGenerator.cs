@@ -4,6 +4,6 @@ namespace SimpleStoreAPI.Interfaces.Auth
 {
     public interface ITokenGenerator
     {
-        public string GenerateToken(ApplicationUser user);
+        public string GenerateToken(ApplicationUser user, IEnumerable<string> roles);
     }
 }

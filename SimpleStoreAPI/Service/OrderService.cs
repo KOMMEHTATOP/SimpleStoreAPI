@@ -243,6 +243,12 @@ public class OrderService : IOrderService
         {
             return Result<OrderResponceDto>.Failed("You don't have the required role");
         }
+        
+        if (!Enum.IsDefined(typeof(OrderStatus), updateStatusDto.Status))
+        {
+            return Result<OrderResponceDto>.Failed("Order status not found");
+        }
+
 
         var order = await _context.Orders
             .Include(o => o.OrderItems)

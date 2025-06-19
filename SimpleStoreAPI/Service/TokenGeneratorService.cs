@@ -15,7 +15,7 @@ namespace SimpleStoreAPI.Service
             _configuration = configuration;
         }
 
-        public string GenerateToken(ApplicationUser user)
+        public string GenerateToken(ApplicationUser user,  IEnumerable<string> roles)
         {
             //список утверждений о пользователе
             var userClaims = new List<Claim>
@@ -24,6 +24,11 @@ namespace SimpleStoreAPI.Service
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+
+            foreach (var role in roles)
+            {
+                userClaims.Add(new Claim(ClaimTypes.Role, role));
+            }
             
             //получаем ключ подписи
             var jwtKey = _configuration["Jwt:Key"];
